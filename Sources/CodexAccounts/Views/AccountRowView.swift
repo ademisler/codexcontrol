@@ -26,10 +26,10 @@ struct AccountRowView: View {
                 if let snapshot = self.state.snapshot, snapshot.hasQuotaWindows {
                     VStack(spacing: 8) {
                         if let primaryWindow = snapshot.primaryWindow {
-                            CompactQuotaLine(title: primaryWindow.shortLabel, window: primaryWindow, tint: .blue)
+                            CompactQuotaLine(title: primaryWindow.shortLabel, window: primaryWindow, tint: self.tint(for: primaryWindow))
                         }
                         if let secondaryWindow = snapshot.secondaryWindow {
-                            CompactQuotaLine(title: secondaryWindow.shortLabel, window: secondaryWindow, tint: self.tint(for: snapshot))
+                            CompactQuotaLine(title: secondaryWindow.shortLabel, window: secondaryWindow, tint: self.tint(for: secondaryWindow))
                         }
                     }
                 }
@@ -145,13 +145,13 @@ struct AccountRowView: View {
                         CompactQuotaPill(
                             title: primaryWindow.shortLabel,
                             window: primaryWindow,
-                            tint: .blue)
+                            tint: self.tint(for: primaryWindow))
                     }
                     if let secondaryWindow = snapshot.secondaryWindow {
                         CompactQuotaPill(
                             title: secondaryWindow.shortLabel,
                             window: secondaryWindow,
-                            tint: self.tint(for: snapshot))
+                            tint: self.tint(for: secondaryWindow))
                     }
                 }
             } else if snapshot.isQuotaBlocked {
@@ -183,8 +183,8 @@ struct AccountRowView: View {
         self.account.emailHint ?? self.account.source.displayName
     }
 
-    private func tint(for snapshot: AccountUsageSnapshot) -> Color {
-        let remaining = snapshot.lowestRemainingPercent
+    private func tint(for window: UsageWindowSnapshot) -> Color {
+        let remaining = window.remainingPercent
         if remaining <= 10 {
             return .red
         }

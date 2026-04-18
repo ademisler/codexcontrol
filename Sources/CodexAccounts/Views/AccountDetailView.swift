@@ -109,18 +109,18 @@ struct AccountDetailView: View {
         {
             QuotaCard(
                 title: self.state.snapshot?.primaryWindow?.displayName ?? "Primary Quota",
-                accent: .blue,
+                accent: self.accent(for: self.state.snapshot?.primaryWindow),
                 window: self.state.snapshot?.primaryWindow)
             QuotaCard(
                 title: self.state.snapshot?.secondaryWindow?.displayName ?? "Secondary Quota",
-                accent: self.weeklyAccent,
+                accent: self.accent(for: self.state.snapshot?.secondaryWindow),
                 window: self.state.snapshot?.secondaryWindow)
             CreditsCard(snapshot: self.state.snapshot?.credits)
         }
     }
 
-    private var weeklyAccent: Color {
-        let remaining = self.state.snapshot?.secondaryWindow?.remainingPercent ?? 101
+    private func accent(for window: UsageWindowSnapshot?) -> Color {
+        let remaining = window?.remainingPercent ?? 101
         if remaining <= 10 {
             return .red
         }
