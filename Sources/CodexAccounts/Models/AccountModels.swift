@@ -215,6 +215,22 @@ struct AccountUsageSnapshot: Codable, Sendable {
         return values.contains { $0 > 0.001 }
     }
 
+    var hasUsableMenuBarQuotaNow: Bool {
+        guard !self.isQuotaBlocked else {
+            return false
+        }
+
+        if let primaryWindow {
+            return primaryWindow.remainingPercent > 0.001
+        }
+
+        if let secondaryWindow {
+            return secondaryWindow.remainingPercent > 0.001
+        }
+
+        return false
+    }
+
     var sortPriority: Int {
         if self.hasUsableQuotaNow {
             return 0

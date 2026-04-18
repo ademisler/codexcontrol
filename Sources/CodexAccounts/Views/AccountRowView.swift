@@ -3,11 +3,14 @@ import SwiftUI
 struct AccountRowView: View {
     let account: StoredAccount
     let state: AccountRuntimeState
+    let isActive: Bool
+    let canSwitch: Bool
     let isSelected: Bool
     let isReauthenticating: Bool
     let onSelect: () -> Void
     let onSaveNickname: (String) -> Void
     let onRefresh: () -> Void
+    let onSwitch: () -> Void
     let onReauthenticate: () -> Void
     let onOpenFolder: () -> Void
     let onRemove: () -> Void
@@ -37,6 +40,10 @@ struct AccountRowView: View {
                 HStack(spacing: 6) {
                     RowActionButton(systemName: "arrow.clockwise", action: self.onRefresh)
                         .help("Refresh")
+                    if self.canSwitch {
+                        RowActionButton(systemName: "arrow.left.arrow.right.circle", action: self.onSwitch)
+                            .help("Switch active account")
+                    }
                     RowActionButton(systemName: "person.crop.circle.badge.checkmark", action: self.onReauthenticate)
                         .help("Reauthenticate")
                     RowActionButton(systemName: "folder", action: self.onOpenFolder)
@@ -115,6 +122,24 @@ struct AccountRowView: View {
             Spacer(minLength: 8)
 
             HStack(spacing: 6) {
+                if self.isActive {
+                    Text("Active")
+                        .font(.system(size: 10, weight: .semibold, design: .rounded))
+                        .padding(.horizontal, 7)
+                        .padding(.vertical, 4)
+                        .background(
+                            Capsule(style: .continuous)
+                                .fill(Color.accentColor.opacity(0.12)))
+                }
+
+                if self.canSwitch && !self.isSelected {
+                    HeaderActionPill(
+                        title: "Switch",
+                        systemName: "arrow.left.arrow.right",
+                        action: self.onSwitch)
+                        .help("Switch active account")
+                }
+
                 if let snapshot = self.state.snapshot {
                     Text(snapshot.planDisplayName)
                         .font(.system(size: 10, weight: .semibold, design: .rounded))
@@ -365,6 +390,29 @@ private struct RowActionButton: View {
                 .background(
                     RoundedRectangle(cornerRadius: 7, style: .continuous)
                         .fill(Color(NSColor.windowBackgroundColor)))
+        }
+        .buttonStyle(.plain)
+    }
+}
+
+private struct HeaderActionPill: View {
+    let title: String
+    let systemName: String
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: self.action) {
+            HStack(spacing: 5) {
+                Image(systemName: self.systemName)
+                    .font(.system(size: 9, weight: .semibold))
+                Text(self.title)
+                    .font(.system(size: 10, weight: .semibold, design: .rounded))
+            }
+            .padding(.horizontal, 7)
+            .padding(.vertical, 4)
+            .background(
+                Capsule(style: .continuous)
+                    .fill(Color(NSColor.windowBackgroundColor)))
         }
         .buttonStyle(.plain)
     }

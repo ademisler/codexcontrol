@@ -12,6 +12,7 @@ enum MenuBarQuotaState {
 final class AppModel: ObservableObject {
     @Published private(set) var accounts: [StoredAccount] = []
     @Published private(set) var runtimeStates: [UUID: AccountRuntimeState] = [:]
+    @Published private(set) var activeIdentity: AuthBackedIdentity?
     @Published var selectedAccountID: UUID?
     @Published var searchText = ""
     @Published private(set) var isRefreshingAll = false
@@ -128,13 +129,17 @@ final class AppModel: ObservableObject {
             return .empty
         }
 
-        if self.usableQuotaCount > 0 {
+        let menuBarUsableCount = self.accounts.filter {
+            self.runtimeStates[$0.id]?.snapshot?.hasUsableMenuBarQuotaNow == true
+        }.count
+
+        if menuBarUsableCount > 0 {
             return .available
         }
 
         let exhaustedCount = self.accounts.filter {
             if let snapshot = self.runtimeStates[$0.id]?.snapshot {
-                return !snapshot.hasUsableQuotaNow
+                return !snapshot.hasUsableMenuBarQuotaNow
             }
             return false
         }.count
@@ -292,6 +297,32 @@ final class AppModel: ObservableObject {
         }
     }
 
+    func switchAccount(_ account: StoredAccount) async {
+        guard !self.isActiveAccount(account) else {
+            self.statusMessage = "\(account.displayName) is already the active Codex account."
+            return
+        }
+
+        do {
+            let result = try self.accountManager.switchActiveAccount(account, existing: self.accounts)
+            if let materializedAccount = result.materializedAccount {
+                self.mergeAccount(materializedAccount)
+                try self.accountStore.saveAccounts(self.accounts)
+            }
+
+            self.loadInitialAccounts()
+            self.refreshActiveIdentity()
+            self.selectedAccountID = self.accounts.first(where: { $0.matches(account) })?.id ?? self.selectedAccountID
+            self.statusMessage = "Switched to \(account.displayName). Restart Codex if needed."
+
+            if let refreshed = self.accounts.first(where: { $0.matches(account) }) {
+                await self.refresh(account: refreshed)
+            }
+        } catch {
+            self.statusMessage = error.localizedDescription
+        }
+    }
+
     func updateNickname(for accountID: UUID, nickname: String) {
         guard let index = self.accounts.firstIndex(where: { $0.id == accountID }) else {
             return
@@ -324,16 +355,52 @@ final class AppModel: ObservableObject {
         NSWorkspace.shared.activateFileViewerSelecting([URL(fileURLWithPath: account.codexHomePath, isDirectory: true)])
     }
 
+    func isActiveAccount(_ account: StoredAccount) -> Bool {
+        guard let activeIdentity else {
+            return false
+        }
+
+        let accountSubject = StoredAccount.normalizeIdentifier(account.authSubject)
+        let identitySubject = StoredAccount.normalizeIdentifier(activeIdentity.authSubject)
+        if let accountSubject, let identitySubject, accountSubject == identitySubject {
+            return true
+        }
+
+        let accountEmail = StoredAccount.normalizeIdentifier(account.emailHint)
+        let identityEmail = StoredAccount.normalizeIdentifier(activeIdentity.email)
+        if let accountEmail, let identityEmail, accountEmail == identityEmail {
+            return true
+        }
+
+        return false
+    }
+
+    func canSwitchAccount(_ account: StoredAccount) -> Bool {
+        guard !self.isActiveAccount(account) else {
+            return false
+        }
+
+        let authURL = URL(fileURLWithPath: account.codexHomePath, isDirectory: true)
+            .appendingPathComponent("auth.json", isDirectory: false)
+        return FileManager.default.fileExists(atPath: authURL.path)
+    }
+
     private func loadInitialAccounts() {
         do {
             let loadedAccounts = try self.accountStore.loadAccounts()
             let storedAccounts = loadedAccounts.filter { $0.source != .ambient }
-            let discoveredManagedAccounts = try self.accountManager.discoverManagedAccounts(existing: storedAccounts)
-            self.accounts = self.accountStore.merge(existing: storedAccounts, incoming: discoveredManagedAccounts)
-            if self.accounts != storedAccounts {
+            let discoveredManagedAccounts = try self.accountManager.discoverManagedAccounts(existing: loadedAccounts)
+            var incomingAccounts = discoveredManagedAccounts
+            if let ambientAccount = try self.accountManager.discoverAmbientAccount(existing: loadedAccounts) {
+                incomingAccounts.insert(ambientAccount, at: 0)
+            }
+
+            self.accounts = self.accountStore.merge(existing: storedAccounts, incoming: incomingAccounts)
+            if self.accounts != loadedAccounts {
                 try self.accountStore.saveAccounts(self.accounts)
             }
             self.ensureSelection()
+            self.refreshActiveIdentity()
         } catch {
             self.statusMessage = error.localizedDescription
         }
@@ -423,6 +490,10 @@ final class AppModel: ObservableObject {
             return
         }
         self.selectedAccountID = self.filteredAccounts.first?.id ?? self.accounts.first?.id
+    }
+
+    private func refreshActiveIdentity() {
+        self.activeIdentity = self.accountManager.loadActiveIdentity()
     }
 
     private func autoRefreshLoop() async {

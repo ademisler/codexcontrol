@@ -43,7 +43,7 @@ struct RootView: View {
                 Text(self.headerStatusText)
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                    .lineLimit(1)
+                    .lineLimit(2)
             }
 
             Spacer()
@@ -110,6 +110,8 @@ struct RootView: View {
                         AccountRowView(
                             account: account,
                             state: self.model.runtimeState(for: account.id),
+                            isActive: self.model.isActiveAccount(account),
+                            canSwitch: self.model.canSwitchAccount(account),
                             isSelected: isSelected,
                             isReauthenticating: self.model.reauthenticatingAccountID == account.id,
                             onSelect: {
@@ -117,6 +119,7 @@ struct RootView: View {
                             },
                             onSaveNickname: { self.model.updateNickname(for: account.id, nickname: $0) },
                             onRefresh: { Task { await self.model.refresh(account: account) } },
+                            onSwitch: { Task { await self.model.switchAccount(account) } },
                             onReauthenticate: { Task { await self.model.reauthenticate(account) } },
                             onOpenFolder: { self.model.openFolder(for: account) },
                             onRemove: { self.model.requestRemoval(of: account) })

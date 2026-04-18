@@ -25,6 +25,10 @@ enum FileLocations {
         self.appSupportDirectory.appendingPathComponent("managed-homes", isDirectory: true)
     }
 
+    static var authBackupsDirectory: URL {
+        self.appSupportDirectory.appendingPathComponent("auth-backups", isDirectory: true)
+    }
+
     static var ambientCodexHome: URL {
         FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent(".codex", isDirectory: true)
     }
@@ -37,5 +41,6 @@ enum FileLocations {
         }
         try FileManager.default.createDirectory(at: self.appSupportDirectory, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: self.managedHomesDirectory, withIntermediateDirectories: true)
+        try FileManager.default.createDirectory(at: self.authBackupsDirectory, withIntermediateDirectories: true)
     }
 }
