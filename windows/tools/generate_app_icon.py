@@ -50,7 +50,7 @@ def main() -> None:
     root = Path(__file__).resolve().parents[1]
     assets_dir = root / "build-assets"
     assets_dir.mkdir(parents=True, exist_ok=True)
-    output_path = assets_dir / "CodexGauge.ico"
+    output_path = assets_dir / "CodexControl.ico"
 
     base = build_icon(256)
     sizes = [(256, 256), (128, 128), (64, 64), (48, 48), (32, 32), (24, 24), (16, 16)]

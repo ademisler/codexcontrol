@@ -292,7 +292,7 @@ class DarkScrollbar(tk.Canvas):
         )
 
 
-class CodexGaugeWindowsApp:
+class CodexControlWindowsApp:
     AUTO_REFRESH_MS = 5 * 60 * 1000
     QUEUE_POLL_MS = 150
 
@@ -341,7 +341,7 @@ class CodexGaugeWindowsApp:
         }
 
         self.root = tk.Tk()
-        self.root.title("CodexGauge")
+        self.root.title("CodexControl")
         self.root.geometry("438x616")
         self.root.minsize(410, 500)
         self.root.configure(bg=self.palette["bg"])
@@ -485,7 +485,7 @@ class CodexGaugeWindowsApp:
 
         confirmed = messagebox.askyesno(
             "Remove Account",
-            f"{account.display_name} will be removed from CodexGauge.",
+            f"{account.display_name} will be removed from CodexControl.",
             parent=self.root,
         )
         if not confirmed:
@@ -660,7 +660,7 @@ class CodexGaugeWindowsApp:
 
         self.title_label = tk.Label(
             title_row,
-            text="CodexGauge",
+            text="CodexControl",
             bg=self.palette["shell"],
             fg=self.palette["text"],
             font=self.fonts["title"],
@@ -771,9 +771,9 @@ class CodexGaugeWindowsApp:
             pystray.MenuItem("Quit", lambda icon, item: self.root.after(0, self.quit)),
         )
         self.tray_icon = pystray.Icon(
-            "CodexGauge",
+            "CodexControl",
             self._create_icon_image("neutral", 64),
-            "CodexGauge",
+            "CodexControl",
             menu,
         )
         self.tray_icon.run_detached()
@@ -1949,5 +1949,5 @@ class CodexGaugeWindowsApp:
 def main(argv: list[str] | None = None) -> None:
     arguments = list(sys.argv[1:] if argv is None else argv)
     start_hidden = any(argument.lower() in {"--hidden", "/hidden"} for argument in arguments)
-    app = CodexGaugeWindowsApp(start_hidden=start_hidden)
+    app = CodexControlWindowsApp(start_hidden=start_hidden)
     app.run()

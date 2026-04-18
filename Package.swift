@@ -3,18 +3,18 @@
 import PackageDescription
 
 let package = Package(
-    name: "CodexGauge",
+    name: "CodexControl",
     platforms: [
         .macOS(.v14),
     ],
     products: [
         .executable(
-            name: "CodexGauge",
-            targets: ["CodexGauge"]),
+            name: "CodexControl",
+            targets: ["CodexControl"]),
     ],
     targets: [
         .executableTarget(
-            name: "CodexGauge",
+            name: "CodexControl",
             path: "Sources/CodexAccounts",
             linkerSettings: [
                 .linkedFramework("AppKit"),

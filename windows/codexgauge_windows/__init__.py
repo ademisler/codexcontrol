@@ -1,4 +1,4 @@
-"""CodexGauge Windows package."""
+"""CodexControl Windows package."""
 
 __all__ = ["__version__"]
 

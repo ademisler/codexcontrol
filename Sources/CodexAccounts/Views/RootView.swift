@@ -30,7 +30,7 @@ struct RootView: View {
             }
         } message: {
             if let account = self.model.pendingRemovalAccount {
-                Text("\(account.displayName) will be removed from CodexGauge.")
+                Text("\(account.displayName) will be removed from CodexControl.")
             }
         }
     }

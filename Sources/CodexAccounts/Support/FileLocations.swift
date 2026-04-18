@@ -4,13 +4,16 @@ enum FileLocations {
     static var appSupportDirectory: URL {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.homeDirectoryForCurrentUser
-        return base.appendingPathComponent("CodexGauge", isDirectory: true)
+        return base.appendingPathComponent("CodexControl", isDirectory: true)
     }
 
-    static var legacyAppSupportDirectory: URL {
+    static var legacyAppSupportDirectories: [URL] {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask).first
             ?? FileManager.default.homeDirectoryForCurrentUser
-        return base.appendingPathComponent("CodexAccounts", isDirectory: true)
+        return [
+            base.appendingPathComponent("CodexGauge", isDirectory: true),
+            base.appendingPathComponent("CodexAccounts", isDirectory: true),
+        ]
     }
 
     static var accountsFile: URL {
@@ -34,10 +37,11 @@ enum FileLocations {
     }
 
     static func ensureDirectories() throws {
-        if !FileManager.default.fileExists(atPath: self.appSupportDirectory.path),
-           FileManager.default.fileExists(atPath: self.legacyAppSupportDirectory.path)
-        {
-            try FileManager.default.moveItem(at: self.legacyAppSupportDirectory, to: self.appSupportDirectory)
+        if !FileManager.default.fileExists(atPath: self.appSupportDirectory.path) {
+            for legacyDirectory in self.legacyAppSupportDirectories where FileManager.default.fileExists(atPath: legacyDirectory.path) {
+                try FileManager.default.moveItem(at: legacyDirectory, to: self.appSupportDirectory)
+                break
+            }
         }
         try FileManager.default.createDirectory(at: self.appSupportDirectory, withIntermediateDirectories: true)
         try FileManager.default.createDirectory(at: self.managedHomesDirectory, withIntermediateDirectories: true)

@@ -531,25 +531,9 @@ enum CodexAPI {
             return (nil, nil)
         }
 
-        var primary = rateLimit.primaryWindow.map(self.makeWindow)
-        var secondary = rateLimit.secondaryWindow.map(self.makeWindow)
-
-        if rateLimit.limitReached == true {
-            if let existingPrimary = primary {
-                primary = UsageWindowSnapshot(
-                    usedPercent: 100,
-                    resetAt: existingPrimary.resetAt,
-                    limitWindowSeconds: existingPrimary.limitWindowSeconds)
-            }
-            if let existingSecondary = secondary {
-                secondary = UsageWindowSnapshot(
-                    usedPercent: 100,
-                    resetAt: existingSecondary.resetAt,
-                    limitWindowSeconds: existingSecondary.limitWindowSeconds)
-            }
-        }
-
-        return self.normalizeWindowRoles(primary: primary, secondary: secondary)
+        return self.normalizeWindowRoles(
+            primary: rateLimit.primaryWindow.map(self.makeWindow),
+            secondary: rateLimit.secondaryWindow.map(self.makeWindow))
     }
 
     private static func normalizeWindowRoles(

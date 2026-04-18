@@ -32,15 +32,15 @@ if ($Clean) {
 $distDir = Join-Path $windowsRoot "dist"
 $workDir = Join-Path $windowsRoot "build"
 $specDir = $windowsRoot
-$iconPath = Join-Path $windowsRoot "build-assets\CodexGauge.ico"
-$entryPath = Join-Path $windowsRoot "CodexGaugeWindows.pyw"
+$iconPath = Join-Path $windowsRoot "build-assets\CodexControl.ico"
+$entryPath = Join-Path $windowsRoot "CodexControlWindows.pyw"
 
 & $pythonExecutable @pythonLauncherArgs -m PyInstaller `
   --noconfirm `
   --clean `
   --onefile `
   --windowed `
-  --name CodexGauge `
+  --name CodexControl `
   --distpath $distDir `
   --workpath $workDir `
   --specpath $specDir `
@@ -50,4 +50,4 @@ $entryPath = Join-Path $windowsRoot "CodexGaugeWindows.pyw"
   --hidden-import PIL._tkinter_finder `
   $entryPath
 
-Write-Output "Built: $(Join-Path $distDir 'CodexGauge.exe')"
+Write-Output "Built: $(Join-Path $distDir 'CodexControl.exe')"
