@@ -145,8 +145,29 @@ struct AccountUsageSnapshot: Codable, Sendable {
         self.limitReached == true || self.allowed == false
     }
 
+    var hasUsableQuotaNow: Bool {
+        guard !self.isQuotaBlocked else {
+            return false
+        }
+
+        let values = [self.secondaryWindow?.remainingPercent, self.primaryWindow?.remainingPercent]
+            .compactMap { $0 }
+
+        guard !values.isEmpty else {
+            return false
+        }
+
+        return values.contains { $0 > 0.001 }
+    }
+
     var sortPriority: Int {
-        self.isQuotaBlocked ? 1 : 0
+        if self.hasUsableQuotaNow {
+            return 0
+        }
+        if self.nextResetAt != nil {
+            return 1
+        }
+        return 2
     }
 
     var nextResetAt: Date? {

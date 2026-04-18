@@ -64,19 +64,23 @@ final class AppModel: ObservableObject {
 
             switch (leftSnapshot, rightSnapshot) {
             case let (.some(leftSnapshot), .some(rightSnapshot)):
-                if leftSnapshot.isQuotaBlocked == rightSnapshot.isQuotaBlocked {
-                    if leftSnapshot.isQuotaBlocked {
-                        let leftReset = leftSnapshot.nextResetAt ?? .distantFuture
-                        let rightReset = rightSnapshot.nextResetAt ?? .distantFuture
-                        if leftReset != rightReset {
-                            return leftReset < rightReset
-                        }
-                    } else {
-                        let leftRemaining = leftSnapshot.lowestRemainingPercent
-                        let rightRemaining = rightSnapshot.lowestRemainingPercent
-                        if leftRemaining != rightRemaining {
-                            return leftRemaining > rightRemaining
-                        }
+                if leftSnapshot.hasUsableQuotaNow && rightSnapshot.hasUsableQuotaNow {
+                    let leftRemaining = leftSnapshot.lowestRemainingPercent
+                    let rightRemaining = rightSnapshot.lowestRemainingPercent
+                    if leftRemaining != rightRemaining {
+                        return leftRemaining > rightRemaining
+                    }
+
+                    let leftReset = leftSnapshot.nextResetAt ?? .distantFuture
+                    let rightReset = rightSnapshot.nextResetAt ?? .distantFuture
+                    if leftReset != rightReset {
+                        return leftReset < rightReset
+                    }
+                } else {
+                    let leftReset = leftSnapshot.nextResetAt ?? .distantFuture
+                    let rightReset = rightSnapshot.nextResetAt ?? .distantFuture
+                    if leftReset != rightReset {
+                        return leftReset < rightReset
                     }
                 }
             case (.some, .none):
