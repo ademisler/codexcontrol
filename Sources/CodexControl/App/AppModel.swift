@@ -24,6 +24,7 @@ final class AppModel: ObservableObject {
     private let accountStore = AccountStore()
     private let snapshotStore = SnapshotStore()
     private let accountManager = CodexAccountManager()
+    private let desktopController = CodexDesktopControl()
     private let autoRefreshInterval: TimeInterval = 5 * 60
     private var autoRefreshTask: Task<Void, Never>?
     private var addAccountTask: Task<Void, Never>?
@@ -313,10 +314,17 @@ final class AppModel: ObservableObject {
             self.loadInitialAccounts()
             self.refreshActiveIdentity()
             self.selectedAccountID = self.accounts.first(where: { $0.matches(account) })?.id ?? self.selectedAccountID
-            self.statusMessage = "Switched to \(account.displayName). Restart Codex if needed."
+            self.statusMessage = "Switched to \(account.displayName). Restarting Codex Desktop."
 
             if let refreshed = self.accounts.first(where: { $0.matches(account) }) {
                 await self.refresh(account: refreshed)
+            }
+
+            do {
+                try await self.desktopController.restartCodexDesktop()
+                self.statusMessage = "Switched to \(account.displayName). Codex Desktop restarted."
+            } catch {
+                self.statusMessage = "Switched to \(account.displayName), but \(error.localizedDescription)"
             }
         } catch {
             self.statusMessage = error.localizedDescription

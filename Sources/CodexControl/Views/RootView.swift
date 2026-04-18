@@ -4,35 +4,21 @@ struct RootView: View {
     @ObservedObject var model: AppModel
 
     var body: some View {
-        VStack(spacing: 10) {
-            self.header
-            self.searchBar
-            self.accountList
+        ZStack {
+            VStack(spacing: 10) {
+                self.header
+                self.searchBar
+                self.accountList
+            }
+            .allowsHitTesting(self.model.pendingRemovalAccount == nil)
+
+            if let pendingRemovalAccount = self.model.pendingRemovalAccount {
+                self.removalOverlay(for: pendingRemovalAccount)
+            }
         }
         .padding(12)
         .frame(width: 430, height: 580)
         .background(Color(NSColor.windowBackgroundColor))
-        .alert(
-            "Remove Account",
-            isPresented: Binding(
-                get: { self.model.pendingRemovalAccount != nil },
-                set: { newValue in
-                    if !newValue {
-                        self.model.cancelPendingRemoval()
-                    }
-                }))
-        {
-            Button("Remove", role: .destructive) {
-                self.model.confirmPendingRemoval()
-            }
-            Button("Cancel", role: .cancel) {
-                self.model.cancelPendingRemoval()
-            }
-        } message: {
-            if let account = self.model.pendingRemovalAccount {
-                Text("\(account.displayName) will be removed from CodexControl.")
-            }
-        }
     }
 
     private var header: some View {
@@ -140,6 +126,59 @@ struct RootView: View {
             return "\(self.model.accountCount) accounts, \(lowQuotaCount) critical"
         }
         return "\(self.model.accountCount) accounts"
+    }
+
+    private func removalOverlay(for account: StoredAccount) -> some View {
+        ZStack {
+            Color.black.opacity(0.16)
+                .ignoresSafeArea()
+                .onTapGesture {
+                    self.model.cancelPendingRemoval()
+                }
+
+            VStack(alignment: .leading, spacing: 12) {
+                Text("Remove Account")
+                    .font(.system(size: 14, weight: .semibold))
+
+                Text("\(account.displayName) will be removed from CodexControl.")
+                    .font(.system(size: 12))
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Spacer()
+
+                    Button("Cancel") {
+                        self.model.cancelPendingRemoval()
+                    }
+                    .buttonStyle(.plain)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(Color(NSColor.controlBackgroundColor)))
+
+                    Button("Remove") {
+                        self.model.confirmPendingRemoval()
+                    }
+                    .buttonStyle(.plain)
+                    .foregroundStyle(.white)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 6)
+                    .background(
+                        Capsule(style: .continuous)
+                            .fill(Color.red))
+                }
+            }
+            .padding(14)
+            .frame(width: 300, alignment: .leading)
+            .background(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .fill(Color(NSColor.windowBackgroundColor)))
+            .overlay(
+                RoundedRectangle(cornerRadius: 14, style: .continuous)
+                    .stroke(Color.primary.opacity(0.08), lineWidth: 1))
+            .shadow(color: Color.black.opacity(0.14), radius: 18, y: 6)
+        }
     }
 }
 
