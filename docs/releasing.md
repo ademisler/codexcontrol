@@ -13,7 +13,6 @@ This repository supports both manual local releases and tag-driven GitHub releas
 Before cutting a release:
 
 ```bash
-./Scripts/bootstrap_sparkle.sh
 swift build
 ./Scripts/package_app.sh
 PYTHONPATH=windows python3 -m unittest discover -s windows/tests -v
@@ -53,7 +52,7 @@ This writes:
 
 ## GitHub Release Workflow
 
-Pushing a tag such as `v1.1.0` triggers `.github/workflows/release.yml`.
+Pushing a tag such as `v1.1.1` triggers `.github/workflows/release.yml`.
 
 That workflow:
 
@@ -77,30 +76,6 @@ If you want GitHub Actions to sign and notarize macOS builds, configure:
 - `APPLE_NOTARY_APP_PASSWORD`
 
 Without these secrets, release builds still complete, but the macOS archive is ad-hoc signed and not notarized.
-
-## Sparkle Feed
-
-After a macOS release archive exists, generate the appcast locally using the keychain-resident Sparkle key:
-
-```bash
-./Scripts/generate_appcast.sh
-```
-
-If direct keychain access is inconvenient in automation, export the private Sparkle key once to a local ignored path and pass it explicitly:
-
-```bash
-SPARKLE_PRIVATE_KEY_FILE=.tmp/sparkle-private.key ./Scripts/generate_appcast.sh
-```
-
-By default this writes:
-
-- `site/appcast.xml`
-
-and expects the release asset URL:
-
-- `https://github.com/ademisler/CodexControl/releases/download/vX.Y.Z/CodexControl-macos.zip`
-
-Release notes for Sparkle should live under `site/releases/`.
 
 ## Homebrew Tap Update
 

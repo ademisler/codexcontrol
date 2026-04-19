@@ -6,11 +6,27 @@ The format is based on Keep a Changelog and this project uses Semantic Versionin
 
 ## [Unreleased]
 
-- Added Sparkle-based macOS update plumbing with signed appcast generation scripts
-- Added Windows release packaging for GitHub Releases
-- Added notarization-ready macOS release scripts and workflow hooks
-- Updated the project brand to the dark Orbit Dial mark with green ring and red core
-- Refined the website visual system and iconography to match the app brand
+## [1.1.1] - 2026-04-19
+
+### Added
+
+- Windows-side presentation logic tests covering active account detection and practical quota sorting
+- Tracked Windows build assets for the packaged tray application icon and preview image
+
+### Changed
+
+- Synced the Windows app from the latest stable `CodexControl-dev` implementation
+- Updated release metadata and direct download references to `1.1.1`
+
+### Removed
+
+- Sparkle-based macOS update plumbing, appcast generation, and the in-app update action
+
+### Fixed
+
+- Windows active-account logic so shared provider IDs do not incorrectly mark multiple accounts as active
+- Windows restart command path normalization for a consistent PowerShell launch path
+- Windows quota presentation flow with the newer sorting and filtering layer from the stable dev copy
 
 ## [1.1.0] - 2026-04-19
 
