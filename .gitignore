@@ -17,3 +17,11 @@ windows/dist/
 windows/.DS_Store
 site/assets/codexcontrol-site-preview.png
 node_modules
+
+# Keep local environment credentials out of Git
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+!.env.*.example
